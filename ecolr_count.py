@@ -17,7 +17,11 @@ hsv = cv2.cvtColor(image_np, cv2.COLOR_RGB2HSV)
 # 青色の範囲を指定（マスク作成）
 lower_blue = np.array([90, 50, 50])     #[色相, 彩度, 明度]の大腸菌数のコロニーかの判定基準において、色相の低いほうの下限を定義（彩度・明度はともに50～255とする）
 upper_blue = np.array([150, 255, 255])  #           〃　　　　　上限を定義
-mask = cv2.inRange(hsv, lower_blue, upper_blue)
+mask = cv2.inRange(hsv, lower_blue, upper_blue)  #inRangeの引数は全て同じ形式（例えば全てHSV形式のデータ）を想定しないと数値の意味がかみ合わないので全て同じ形式を想定。全てのピクセルデータで繰り返される
+# 変数 mask にはHSV画像内のすべてのピクセルについて、lower_blue〜upper_blue の範囲に入るかどうかをチェックして、
+# 該当するピクセルは 255（白）、そうでないピクセルは 0（黒） にした2値画像（マスク画像） を返します。
+
+
 
 # 輪郭を検出（青色領域の数をカウント）
 contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
