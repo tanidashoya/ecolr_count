@@ -1,6 +1,5 @@
 from flask import Flask,request,render_template
 from PIL import Image
-from PIL.ExifTags import TAGS
 import cv2
 import numpy as np
 # import matplotlib.pyplot as plt

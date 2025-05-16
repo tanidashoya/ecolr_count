@@ -1,0 +1,4 @@
+flask
+Pillow
+cv2
+numpy
