@@ -2,6 +2,7 @@ from flask import Flask,request,render_template
 from PIL import Image
 import cv2
 import numpy as np
+import tempfile
 # import matplotlib.pyplot as plt
 
 
@@ -20,10 +21,16 @@ def index():
         
         for img_file in image_files:
             #ファイル名を取得
-            img_file.stream.seek(0)
             filename = img_file.filename
+            img_file.stream.seek(0)
+            
+            #renderサーバーに一時的に保存する
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
+                img_file.save(tmp)
+                tmp_path = tmp.name
+            
             # 画像読み込み（RGB形式で読み込む）
-            image = Image.open(img_file).convert("RGB")
+            image = Image.open(tmp_path).convert("RGB")
             image_np = np.array(image) 
 
             # RGB画像をHSV（色相・彩度・明度）に変換(image_npは各ピクセルのデータをRGB形式（赤・緑・青）で持っているため人の感覚に近いHSV形式（色相・彩度・明度）)

@@ -3,3 +3,4 @@ Pillow
 opencv-python
 numpy
 gunicorn
+tempfile
