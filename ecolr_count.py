@@ -1,47 +1,102 @@
+from flask import Flask,request,render_template
 from PIL import Image
+from PIL.ExifTags import TAGS
 import cv2
 import numpy as np
+import glob
+import os
 # import matplotlib.pyplot as plt
 
-#大腸菌数測定用画像のpngとjpegファイルを繰り返し処理して結果を出力させるコードを書く
+#既存のディレクトリにアクセスする方法
+# dir_path = "D:/Users/tanida/Desktop/ecolr_image"
+# file_png_path =  glob.glob(os.path.join(dir_path,"*.png"))
+# file_jpg_path =  glob.glob(os.path.join(dir_path,"*.jpg"))
+# all_image_path = file_png_path + file_jpg_path
+
+app = Flask(__name__)
 
 
 
-# 画像読み込み（RGB形式で読み込む）
-image = Image.open("D:\\Users\\tanida\\Desktop\\ecolr.png").convert("RGB")
-image_np = np.array(image) 
+@app.route("/",methods=["GET","POST"])
+def index():
+  
+    if request.method == "POST":
+        #画像を受け取った場合の処理
+        image_files = request.files.getlist("image")   #HTMLから受け取った画像ファイル
+        result = []
+        
+        for img_file in image_files:
+            #ファイル名を取得
+            filename = img_file.filename
+            # 画像読み込み（RGB形式で読み込む）
+            image = Image.open(img_file).convert("RGB")
+            image_np = np.array(image) 
 
-# RGB画像をHSV（色相・彩度・明度）に変換(image_npは各ピクセルのデータをRGB形式（赤・緑・青）で持っているため人の感覚に近いHSV形式（色相・彩度・明度）)
-hsv = cv2.cvtColor(image_np, cv2.COLOR_RGB2HSV)
+            # RGB画像をHSV（色相・彩度・明度）に変換(image_npは各ピクセルのデータをRGB形式（赤・緑・青）で持っているため人の感覚に近いHSV形式（色相・彩度・明度）)
+            hsv = cv2.cvtColor(image_np, cv2.COLOR_RGB2HSV)
 
-# 青色の範囲を指定（マスク作成）
-lower_blue = np.array([90, 50, 50])     #[色相, 彩度, 明度]の大腸菌数のコロニーかの判定基準において、色相の低いほうの下限を定義（彩度・明度はともに50～255とする）
-upper_blue = np.array([150, 255, 255])  #           〃　　　　　上限を定義
-mask = cv2.inRange(hsv, lower_blue, upper_blue)  #inRangeの引数は全て同じ形式（例えば全てHSV形式のデータ）を想定しないと数値の意味がかみ合わないので全て同じ形式を想定。全てのピクセルデータで繰り返される
-# 変数 mask にはHSV画像内のすべてのピクセルについて、lower_blue〜upper_blue の範囲に入るかどうかをチェックして、
-# 該当するピクセルは 255（白）、そうでないピクセルは 0（黒） にした2値画像（マスク画像） を返します。
+            # 青色の範囲を指定（マスク作成）
+            lower_blue = np.array([90, 50, 50])     #[色相, 彩度, 明度]の大腸菌数のコロニーかの判定基準において、色相の低いほうの下限を定義（彩度・明度はともに50～255とする）
+            upper_blue = np.array([135, 255, 255])  #           〃　　　　　上限を定義
+            mask = cv2.inRange(hsv, lower_blue, upper_blue)  #inRangeの引数は全て同じ形式（例えば全てHSV形式のデータ）を想定しないと数値の意味がかみ合わないので全て同じ形式を想定。全てのピクセルデータで繰り返される
+            # 変数 mask にはHSV画像内のすべてのピクセルについて、lower_blue〜upper_blue の範囲に入るかどうかをチェックして、
+            # 該当するピクセルは 255（白）、そうでないピクセルは 0（黒） にした2値画像（マスク画像） を返します。
 
-
-
-# 輪郭を検出（青色領域の数をカウント）
-contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-blue_dot_count = len(contours)
-
-# 結果を描画（青い点の輪郭を赤く描く）
-# output_image = image_np.copy()
-# cv2.drawContours(output_image, contours, -1, (255, 0, 0), 1)
-
-# 結果を表示
-# plt.figure(figsize=(8, 8))
-# plt.imshow(output_image)
-# plt.axis("off")
-# plt.title(f"青い点の数: {blue_dot_count}")
-# plt.show()
-
-# 点の数を出力
-print("青い点の数:", blue_dot_count)
+            # 輪郭を検出（青色領域の数をカウント）
+            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            blue_dot_count = len(contours)
+            
+            result.append(f"{filename} の大腸菌数: {blue_dot_count} 個")    #resultに結果をリストで貯めていく
+      
+        return render_template("index.html",result=result)
+      
+    return render_template("index.html")
 
 
+
+#連続して画像処理を行えるようにする
+# for img_path in image_files:
+        
+#     #【できれば】プレートだけを切り抜いた画像をimg_pathに更新する。
+    
+
+#     # 画像読み込み（RGB形式で読み込む）
+#     image = Image.open(img_path).convert("RGB")
+#     image_np = np.array(image) 
+
+#     # RGB画像をHSV（色相・彩度・明度）に変換(image_npは各ピクセルのデータをRGB形式（赤・緑・青）で持っているため人の感覚に近いHSV形式（色相・彩度・明度）)
+#     hsv = cv2.cvtColor(image_np, cv2.COLOR_RGB2HSV)
+
+#     # 青色の範囲を指定（マスク作成）
+#     lower_blue = np.array([90, 50, 50])     #[色相, 彩度, 明度]の大腸菌数のコロニーかの判定基準において、色相の低いほうの下限を定義（彩度・明度はともに50～255とする）
+#     upper_blue = np.array([135, 255, 255])  #           〃　　　　　上限を定義
+#     mask = cv2.inRange(hsv, lower_blue, upper_blue)  #inRangeの引数は全て同じ形式（例えば全てHSV形式のデータ）を想定しないと数値の意味がかみ合わないので全て同じ形式を想定。全てのピクセルデータで繰り返される
+#     # 変数 mask にはHSV画像内のすべてのピクセルについて、lower_blue〜upper_blue の範囲に入るかどうかをチェックして、
+#     # 該当するピクセルは 255（白）、そうでないピクセルは 0（黒） にした2値画像（マスク画像） を返します。
+
+
+
+#     # 輪郭を検出（青色領域の数をカウント）
+#     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+#     blue_dot_count = len(contours)
+
+#     # 結果を描画（青い点の輪郭を赤く描く）
+#     # output_image = image_np.copy()
+#     # cv2.drawContours(output_image, contours, -1, (255, 0, 0), 1)
+
+#     # 結果を表示
+#     # plt.figure(figsize=(8, 8))
+#     # plt.imshow(output_image)
+#     # plt.axis("off")
+#     # plt.title(f"青い点の数: {blue_dot_count}")
+#     # plt.show()
+
+#     # 点の数を出力
+#     file_name = os.path.basename(img_path)
+#     print(f"{file_name} の青い点の数: {blue_dot_count} 個")
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
 
 #色相について
 """

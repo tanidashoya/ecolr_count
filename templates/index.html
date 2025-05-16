@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>画像処理アプリ</title>
+  <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
+</head>
+<body>
+  <h1>画像アップロード＆グレースケール変換</h1>
+  <form action="/" method="post" enctype="multipart/form-data">
+    <input type="file" name="image" accept="image/*" multiple required>
+    <br>
+    <input type="submit" value="アップロードして変換">
+  </form>
+
+<!-- resultには各画像の名前と青い点の数が入っている -->
+  {% if result %}
+    <h2>画像の青い点の数:</h2>
+    <ul>
+    {% for res in result %}
+      <li>{{res}}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+</body>
+</html>
