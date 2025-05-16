@@ -12,7 +12,16 @@ img {
 input[type="file"] { 
     margin-top: 10px; 
 }
+
 input[type="submit"] { 
     padding: 10px 20px; 
     margin-top: 10px; 
+}
+
+table {
+    margin: 0 auto;
+}
+
+th,td {
+    padding: 5px 12px;
 }
