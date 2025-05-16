@@ -2,3 +2,4 @@ flask
 Pillow
 cv2
 numpy
+gunicorn
