@@ -14,11 +14,13 @@ def index():
   
     if request.method == "POST":
         #画像を受け取った場合の処理
+        
         image_files = request.files.getlist("image")   #HTMLから受け取った画像ファイル
         result = {}
         
         for img_file in image_files:
             #ファイル名を取得
+            img_file.stream.seek(0)
             filename = img_file.filename
             # 画像読み込み（RGB形式で読み込む）
             image = Image.open(img_file).convert("RGB")
