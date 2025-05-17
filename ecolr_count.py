@@ -1,8 +1,8 @@
-from flask import Flask,request,render_template
-from PIL import Image
-import cv2
-import numpy as np
-import tempfile
+from flask import Flask,request,render_template   #flaskアプリの構築
+from PIL import Image   #画像を開く・保存する・加工するためのライブラリ
+import cv2      #画像処理・動画処理の高機能ライブラリ
+import numpy as np      #数値計算・行列処理・ベクトル演算の基礎を支えるライブラリ
+import tempfile      #一時ファイルや一時ディレクトリを作るための標準ライブラリ
 # import matplotlib.pyplot as plt
 
 
@@ -37,14 +37,18 @@ def index():
 
             # 青色の範囲を指定（マスク作成）
             lower_blue = np.array([90, 50, 50])     #[色相, 彩度, 明度]の大腸菌数のコロニーかの判定基準において、色相の低いほうの下限を定義（彩度・明度はともに50～255とする）
-            upper_blue = np.array([130, 255, 255])  #           〃　　　　　上限を定義
+            upper_blue = np.array([140, 255, 255])  #           〃　　　　　上限を定義
             mask = cv2.inRange(hsv, lower_blue, upper_blue)  #inRangeの引数は全て同じ形式（例えば全てHSV形式のデータ）を想定しないと数値の意味がかみ合わないので全て同じ形式を想定。全てのピクセルデータで繰り返される
             # 変数 mask にはHSV画像内のすべてのピクセルについて、lower_blue〜upper_blue の範囲に入るかどうかをチェックして、
             # 該当するピクセルは 255（白）、そうでないピクセルは 0（黒） にした2値画像（マスク画像） を返します。
 
             # 輪郭を検出（青色領域の数をカウント）
             contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            blue_dot_count = len(contours)
+            min_area = 1  # 必要に応じて調整してください
+            filtered_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_area]
+            
+            blue_dot_count = len(filtered_contours)
+            
             
             result[filename] = f"{blue_dot_count} 個"    #resultに結果を辞書として貯めていく
       
