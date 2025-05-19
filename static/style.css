@@ -25,3 +25,15 @@ table {
 th,td {
     padding: 5px 12px;
 }
+
+input[type="file"] {
+    font-size: 15px;
+    padding: 18px;
+    margin:5px;
+}
+
+input[type="submit"] {
+    margin-top: 15px;
+    padding: 20px;
+    font-size: 15px;
+}
